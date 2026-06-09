@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FOC航班运行控制系统 - 科技感风格</title>
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #e2e8f0;
+      height: 100vh;
+      overflow: hidden;
+    }
+    /* 顶部导航栏 */
+    .header {
+      height: 60px;
+      background: linear-gradient(90deg, #0f172a, #1e293b);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      border-bottom: 1px solid #334155;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    .header-logo {
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .header-info i {
+      font-size: 18px;
+      cursor: pointer;
+      color: #60a5fa;
+      transition: all 0.3s ease;
+    }
+    .header-info i:hover {
+      color: #38bdf8;
+      transform: scale(1.1);
+    }
+    /* 整体容器 */
+    .container {
+      display: flex;
+      margin-top: 60px;
+      height: calc(100vh - 60px);
+    }
+    /* 左侧侧边栏菜单 */
+    .sidebar {
+      width: 260px;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid #334155;
+      overflow-y: auto;
+      position: fixed;
+      top: 60px;
+      left: 0;
+      bottom: 0;
+      z-index: 998;
+    }
+    .menu-item {
+      height: 52px;
+      line-height: 52px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      color: #94a3b8;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+    .menu-item:hover {
+      background: rgba(56, 189, 248, 0.1);
+      color: #38bdf8;
+      border-left: 3px solid #38bdf8;
+    }
+    .menu-item.active {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      border-left: 3px solid #38bdf8;
+      font-weight: 500;
+    }
+    /* 主内容区域 */
+    .main {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      margin-left: 260px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #f1f5f9;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    }
+    /* 卡片容器 */
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid #334155;
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: 0 12px 40px rgba(56, 189, 248, 0.2);
+      transform: translateY(-2px);
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      color: #e2e8f0;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    .card-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+      border-radius: 2px;
+    }
+    /* 搜索筛选栏 */
+    .search-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #334155;
+    }
+    .search-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .search-item label {
+      font-size: 14px;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+    .search-item input,
+    .search-item select {
+      width: 180px;
+      height: 36px;
+      padding: 0 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid #475569;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #e2e8f0;
+      transition: all 0.3s ease;
+    }
+    .search-item input:focus,
+    .search-item select:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    /* 按钮样式 */
+    .btn {
+      height: 36px;
+      padding: 0 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+    }
+    .btn-default {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid #475569;
+      color: #e2e8f0;
+    }
+    .btn-default:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: #38bdf8;
+    }
+    .btn-sm {
+      height: 28px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+    .btn-warning {
+      background: linear-gradient(90deg, #f97316, #fb923c);
+      color: #fff;
+    }
+    .btn-warning:hover {
+      background: linear-gradient(90deg, #fb923c, #f97316);
+      box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+    }
+    .btn-success {
+      background: linear-gradient(90deg, #10b981, #34d399);
+      color: #fff;
+    }
+    .btn-success:hover {
+      background: linear-gradient(90deg, #34d399, #10b981);
+      box-shadow: 0 0 15px rgba(52, 211, 153, 0.4);
+    }
+    /* 表格样式 */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: rgba(15, 23, 42, 0.3);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .table th {
+      background: rgba(30, 41, 59, 0.8);
+      height: 44px;
+      text-align: left;
+      padding: 0 12px;
+      color: #94a3b8;
+      border-bottom: 1px solid #334155;
+    }
+    .table td {
+      height: 44px;
+      padding: 0 12px;
+      border-bottom: 1px solid #334155;
+      color: #cbd5e1;
+    }
+    .table tr:last-child td {
+      border-bottom: none;
+    }
+    .table tr:hover {
+      background: rgba(56, 189, 248, 0.05);
+    }
+    /* 状态标签 */
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .tag-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .tag-warning {
+      background: rgba(249, 115, 22, 0.15);
+      color: #fb923c;
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+    .tag-danger {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .tag-info {
+      background: rgba(14, 165, 233, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(14, 165, 233, 0.3);
+    }
+    .tag-processing {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .tag-gray {
+      background: rgba(100, 116, 139, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.3);
+    }
+    .tag-blue {
+      background: rgba(59, 130, 236, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 236, 0.3);
+    }
+    .tag-cyan {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+    .tag-green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .tag-red {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    /* 页面容器 默认隐藏 */
+    .page {
+      display: none;
+    }
+    .page.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* 弹窗样式 */
+    .mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+    .dialog {
+      width: 700px;
+      background: rgba(30, 41, 59, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid #334155;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+    .dialog-title {
+      font-size: 18px;
+      margin-bottom: 24px;
+      font-weight: 500;
+      color: #f1f5f9;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    .dialog-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+      border-radius: 2px;
+    }
+    .form-item {
+      margin-bottom: 20px;
+    }
+    .form-item label {
+      display: inline-block;
+      width: 140px;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    .form-item input, .form-item select, .form-item textarea {
+      width: 400px;
+      height: 36px;
+      padding: 0 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #e2e8f0;
+      transition: all 0.3s ease;
+    }
+    .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    .form-item textarea {
+      height: 80px;
+      resize: vertical;
+    }
+    .dialog-footer {
+      text-align: right;
+      margin-top: 24px;
+      gap: 12px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    /* 时间线样式 */
+    .timeline {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .timeline-item {
+      padding: 12px 0;
+      border-left: 2px solid #334155;
+      position: relative;
+      padding-left: 24px;
+      margin-left: 24px;
+    }
+    .timeline-item:before {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #38bdf8;
+      left: -7px;
+      top: 18px;
+      border: 2px solid #0f172a;
+    }
+    .timeline-time {
+      font-size: 13px;
+      color: #60a5fa;
+    }
+    .timeline-desc {
+      margin-top: 5px;
+      color: #cbd5e1;
+    }
+    /* 子表格样式 */
+    .sub-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .sub-table th {
+      background: rgba(30, 41, 59, 0.8);
+      height: 36px;
+      text-align: left;
+      padding: 0 10px;
+      color: #94a3b8;
+      border-bottom: 1px solid #334155;
+    }
+    .sub-table td {
+      height: 36px;
+      padding: 0 10px;
+      border-bottom: 1px solid #334155;
+      color: #cbd5e1;
+    }
+    .sub-table tr:last-child td {
+      border-bottom: none;
+    }
+    .expandable-row {
+      cursor: pointer;
+    }
+    .expandable-row:hover {
+      background: rgba(56, 189, 248, 0.1);
+    }
+    .expanded-content {
+      display: none;
+      background: rgba(15, 23, 42, 0.3);
+      padding: 12px;
+    }
+    .expanded-content.show {
+      display: table-row;
+    }
+    .toggle-icon {
+      transition: transform 0.3s ease;
+    }
+    .rotate {
+      transform: rotate(90deg);
+    }
+    /* 新增：整体风险总状态看板样式 */
+    .risk-dashboard {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      border: 1px solid #334155;
+      border-left: 6px solid #10b981;
+    }
+    .risk-dashboard.normal {
+      border-left-color: #10b981;
+    }
+    .risk-dashboard.warning {
+      border-left-color: #f97316;
+    }
+    .risk-dashboard.danger {
+      border-left-color: #ef4444;
+    }
+    .risk-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+    .risk-status {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .risk-status.normal {
+      color: #34d399;
+    }
+    .risk-status.warning {
+      color: #fb923c;
+    }
+    .risk-status.danger {
+      color: #f87171;
+    }
+    .risk-desc {
+      font-size: 14px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    /* 新增：研判报告弹窗样式 */
+    .report-dialog {
+      width: 900px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .report-section {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #334155;
+    }
+    .report-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #e2e8f0;
+    }
+    .report-content {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+    .report-meta {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #334155;
+      font-size: 14px;
+      color: #94a3b8;
+    }
+    /* 新增：影响航班列表样式 */
+    .affected-flights {
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .affected-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+      color: #94a3b8;
+    }
+    .flight-tag {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 3px;
+      margin-right: 4px;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部头部 -->
+  <div class="header">
+    <div class="header-logo">
+      <i class="fa-solid fa-plane"></i>
+      航空公司 FOC 航班运行控制系统
+    </div>
+    <div class="header-info">
+      <i class="fa-solid fa-bell"></i>
+      <span>当前值班：郑润枝（运行调度组） | 2026-05-28</span>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- 左侧菜单 9大模块 -->
+    <div class="sidebar">
+      <div class="menu-item active" data-page="page1">
+        <i class="fa-solid fa-calendar"></i> 1. 航班计划管理
+      </div>
+      <div class="menu-item" data-page="page2">
+        <i class="fa-solid fa-plane-departure"></i> 2. 运力/飞机排班
+      </div>
+      <div class="menu-item" data-page="page3">
+        <i class="fa-solid fa-users"></i> 3. 机组排班管理
+      </div>
+      <div class="menu-item" data-page="page4">
+        <i class="fa-solid fa-cloud-sun"></i> 4. 情报与气象支撑
+      </div>
+      <div class="menu-item" data-page="page5">
+        <i class="fa-solid fa-file-signature"></i> 5. 飞行签派放行
+      </div>
+      <div class="menu-item" data-page="page6">
+        <i class="fa-solid fa-binoculars"></i> 6. 实时航班动态监控
+      </div>
+      <div class="menu-item" data-page="page7">
+        <i class="fa-solid fa-truck-plane"></i> 7. 地面保障协同调度
+      </div>
+      <div class="menu-item" data-page="page8">
+        <i class="fa-solid fa-triangle-exclamation"></i> 8. 应急处置与运行决策
+      </div>
+      <div class="menu-item" data-page="page9">
+        <i class="fa-solid fa-chart-pie"></i> 9. 运行统计与事后复盘
+      </div>
+    </div>
+
+    <!-- 主内容区：航班计划管理页面 -->
+    <div class="main">
+      <div class="page show" id="page1">
+        <div class="page-title">1. 航班计划管理</div>
+        <div class="card">
+          <div class="card-title">航班计划申报列表</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>计划周期</label>
+              <input type="month">
+            </div>
+            <div class="search-item">
+              <label>航班号</label>
+              <input type="text" placeholder="CA1234">
+            </div>
+            <div class="search-item">
+              <label>航线</label>
+              <input type="text" placeholder="北京-上海">
+            </div>
+            <div class="search-item">
+              <label>审批状态</label>
+              <select>
+                <option>全部</option>
+                <option>草稿</option>
+                <option>民航局审批中</option>
+                <option>空管审核中</option>
+                <option>机场评估中</option>
+                <option>正式生效</option>
+                <option>已驳回</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default" onclick="openAddPlanDialog()">新增计划</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>航班号</th>
+                <th>航线</th>
+                <th>计划起飞</th>
+                <th>计划落地</th>
+                <th>当前审批环节</th>
+                <th>审批状态</th>
+                <th>批复意见</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CA1201</td>
+                <td>北京首都 → 上海虹桥</td>
+                <td>08:30</td>
+                <td>10:45</td>
+                <td>空管航路审核</td>
+                <td><span class="tag tag-cyan">空管审核中</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="showApprovalDetails('CA1201')">查看批复</button>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="showTimeline('CA1201')">查看流程</button>
+                  <button class="btn btn-sm btn-warning" onclick="viewAirTrafficReview('CA1201')">空管审核</button>
+                </td>
+              </tr>
+              <tr>
+                <td>CZ3905</td>
+                <td>广州白云 → 成都双流</td>
+                <td>14:20</td>
+                <td>16:50</td>
+                <td>机场机位评估</td>
+                <td><span class="tag tag-green">机场评估中</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="showApprovalDetails('CZ3905')">查看批复</button>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="showTimeline('CZ3905')">查看流程</button>
+                  <button class="btn btn-sm btn-success" onclick="confirmAirportAllocation('CZ3905')">确认机位</button>
+                </td>
+              </tr>
+              <tr>
+                <td>MU5432</td>
+                <td>上海浦东 → 西安咸阳</td>
+                <td>09:15</td>
+                <td>11:45</td>
+                <td>民航局审批</td>
+                <td><span class="tag tag-blue">民航局审批中</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="showApprovalDetails('MU5432')">查看批复</button>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="showTimeline('MU5432')">查看流程</button>
+                  <button class="btn btn-sm btn-default" onclick="checkApprovalProgress('MU5432')">进度跟踪</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 运力排班页面 -->
+      <div class="page" id="page2">
+        <div class="page-title">2. 运力/飞机排班</div>
+        <div class="card">
+          <div class="card-title">当日飞机排班列表</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>执行日期</label>
+              <input type="date">
+            </div>
+            <div class="search-item">
+              <label>飞机注册号</label>
+              <input type="text" placeholder="B-XXXX">
+            </div>
+            <div class="search-item">
+              <label>适航状态</label>
+              <select>
+                <option>全部</option>
+                <option>正常可用</option>
+                <option>维修中</option>
+                <option>故障停场</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">批量分配飞机</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 20px;"></th>
+                <th>航班号</th>
+                <th>执飞飞机号</th>
+                <th>机型</th>
+                <th>航段衔接</th>
+                <th>过夜机场</th>
+                <th>飞机状态</th>
+                <th>维修限制</th>
+                <th>更换原因</th>
+                <th>调机事由</th>
+                <th>换飞审批状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="expandable-row">
+                <td><i class="fa-solid fa-chevron-right toggle-icon"></i></td>
+                <td>CA1501</td>
+                <td>B-5123</td>
+                <td>A320</td>
+                <td>正常衔接</td>
+                <td>上海虹桥</td>
+                <td><span class="tag tag-success">适航正常</span></td>
+                <td>无</td>
+                <td>—</td>
+                <td>—</td>
+                <td>—</td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="openReplacePlaneDialog('CA1501')">本场换飞机</button>
+                  <button class="btn btn-sm btn-default" onclick="openSegmentSwapDialog('CA1501')">航段拆分互换</button>
+                </td>
+              </tr>
+              <tr class="expanded-content">
+                <td colspan="12">
+                  <div class="card">
+                    <div class="card-title">B-5123 当日航段详情</div>
+                    <table class="sub-table">
+                      <thead>
+                        <tr>
+                          <th>航班号</th>
+                          <th>航线</th>
+                          <th>计划起飞</th>
+                          <th>计划落地</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>CA1501</td>
+                          <td>北京→上海</td>
+                          <td>08:00</td>
+                          <td>10:15</td>
+                          <td><span class="tag tag-success">正常</span></td>
+                        </tr>
+                        <tr>
+                          <td>CA1502</td>
+                          <td>上海→广州</td>
+                          <td>11:30</td>
+                          <td>14:00</td>
+                          <td><span class="tag tag-info">待执行</span></td>
+                        </tr>
+                        <tr>
+                          <td>CA1503</td>
+                          <td>广州→北京</td>
+                          <td>15:20</td>
+                          <td>17:50</td>
+                          <td><span class="tag tag-info">待执行</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="expandable-row">
+                <td><i class="fa-solid fa-chevron-right toggle-icon"></i></td>
+                <td>CZ3301</td>
+                <td>B-7890</td>
+                <td>B737</td>
+                <td>航段紧张</td>
+                <td>深圳宝安</td>
+                <td><span class="tag tag-danger">临时故障</span></td>
+                <td>禁止执飞</td>
+                <td><span class="tag tag-danger">飞机故障维修</span></td>
+                <td>故障飞机转场维修</td>
+                <td><span class="tag tag-processing">待审核</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="openReplacePlaneDialog('CZ3301')">本场换飞机</button>
+                  <button class="btn btn-sm btn-default" onclick="openTransferDialog('CZ3301')">发起跨场调机</button>
+                </td>
+              </tr>
+              <tr class="expanded-content">
+                <td colspan="12">
+                  <div class="card">
+                    <div class="card-title">B-7890 当日航段详情</div>
+                    <table class="sub-table">
+                      <thead>
+                        <tr>
+                          <th>航班号</th>
+                          <th>航线</th>
+                          <th>计划起飞</th>
+                          <th>计划落地</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>CZ3301</td>
+                          <td>深圳→成都</td>
+                          <td>09:00</td>
+                          <td>12:00</td>
+                          <td><span class="tag tag-danger">延误</span></td>
+                        </tr>
+                        <tr>
+                          <td>CZ3302</td>
+                          <td>成都→深圳</td>
+                          <td>13:30</td>
+                          <td>16:20</td>
+                          <td><span class="tag tag-warning">待调整</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="expandable-row">
+                <td><i class="fa-solid fa-chevron-right toggle-icon"></i></td>
+                <td>MU5105</td>
+                <td>B-1234</td>
+                <td>A321</td>
+                <td>正常衔接</td>
+                <td>广州白云</td>
+                <td><span class="tag tag-info">适航正常</span></td>
+                <td>—</td>
+                <td><span class="tag tag-warning">运力临时调配</span></td>
+                <td>备用机支援异地延误航班</td>
+                <td><span class="tag tag-success">已通过</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="openReplacePlaneDialog('MU5105')">本场换飞机</button>
+                  <button class="btn btn-sm btn-default" onclick="openSegmentSwapDialog('MU5105')">航段拆分互换</button>
+                </td>
+              </tr>
+              <tr class="expanded-content">
+                <td colspan="12">
+                  <div class="card">
+                    <div class="card-title">B-1234 当日航段详情</div>
+                    <table class="sub-table">
+                      <thead>
+                        <tr>
+                          <th>航班号</th>
+                          <th>航线</th>
+                          <th>计划起飞</th>
+                          <th>计划落地</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>MU5105</td>
+                          <td>上海→广州</td>
+                          <td>09:20</td>
+                          <td>11:50</td>
+                          <td><span class="tag tag-success">正常</span></td>
+                        </tr>
+                        <tr>
+                          <td>MU5106</td>
+                          <td>广州→上海</td>
+                          <td>13:00</td>
+                          <td>15:30</td>
+                          <td><span class="tag tag-info">待执行</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="expandable-row">
+                <td><i class="fa-solid fa-chevron-right toggle-icon"></i></td>
+                <td>CZ6501</td>
+                <td>B-2345</td>
+                <td>B737</td>
+                <td>正常衔接</td>
+                <td>重庆江北</td>
+                <td><span class="tag tag-warning">定检临近</span></td>
+                <td>需定检</td>
+                <td><span class="tag tag-info">定检延期</span></td>
+                <td>过夜站点调整</td>
+                <td><span class="tag tag-info">驳回</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="openReplacePlaneDialog('CZ6501')">本场换飞机</button>
+                  <button class="btn btn-sm btn-default" onclick="openTransferDialog('CZ6501')">发起跨场调机</button>
+                </td>
+              </tr>
+              <tr class="expanded-content">
+                <td colspan="12">
+                  <div class="card">
+                    <div class="card-title">B-2345 当日航段详情</div>
+                    <table class="sub-table">
+                      <thead>
+                        <tr>
+                          <th>航班号</th>
+                          <th>航线</th>
+                          <th>计划起飞</th>
+                          <th>计划落地</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>CZ6501</td>
+                          <td>北京→重庆</td>
+                          <td>10:00</td>
+                          <td>12:30</td>
+                          <td><span class="tag tag-success">正常</span></td>
+                        </tr>
+                        <tr>
+                          <td>CZ6502</td>
+                          <td>重庆→北京</td>
+                          <td>14:00</td>
+                          <td>16:30</td>
+                          <td><span class="tag tag-info">待执行</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="expandable-row">
+                <td><i class="fa-solid fa-chevron-right toggle-icon"></i></td>
+                <td>FM9101</td>
+                <td>B-3456</td>
+                <td>A320</td>
+                <td>正常衔接</td>
+                <td>上海浦东</td>
+                <td><span class="tag tag-success">适航正常</span></td>
+                <td>—</td>
+                <td><span class="tag tag-info">航班合并</span></td>
+                <td>新开航线运力前置部署</td>
+                <td><span class="tag tag-success">已通过</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="openReplacePlaneDialog('FM9101')">本场换飞机</button>
+                  <button class="btn btn-sm btn-default" onclick="openSegmentSwapDialog('FM9101')">航段拆分互换</button>
+                </td>
+              </tr>
+              <tr class="expanded-content">
+                <td colspan="12">
+                  <div class="card">
+                    <div class="card-title">B-3456 当日航段详情</div>
+                    <table class="sub-table">
+                      <thead>
+                        <tr>
+                          <th>航班号</th>
+                          <th>航线</th>
+                          <th>计划起飞</th>
+                          <th>计划落地</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>FM9101</td>
+                          <td>上海→厦门</td>
+                          <td>11:00</td>
+                          <td>13:20</td>
+                          <td><span class="tag tag-success">正常</span></td>
+                        </tr>
+                        <tr>
+                          <td>FM9102</td>
+                          <td>厦门→上海</td>
+                          <td>14:30</td>
+                          <td>16:50</td>
+                          <td><span class="tag tag-info">待执行</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr class="expandable-row">
+                <td><i class="fa-solid fa-chevron-right toggle-icon"></i></td>
+                <td>HO1201</td>
+                <td>B-4567</td>
+                <td>A320</td>
+                <td>正常衔接</td>
+                <td>杭州萧山</td>
+                <td><span class="tag tag-success">适航正常</span></td>
+                <td>—</td>
+                <td><span class="tag tag-info">局方管控</span></td>
+                <td>异地补运力</td>
+                <td><span class="tag tag-processing">审批中</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default" onclick="openReplacePlaneDialog('HO1201')">本场换飞机</button>
+                  <button class="btn btn-sm btn-default" onclick="openTransferDialog('HO1201')">发起跨场调机</button>
+                </td>
+              </tr>
+              <tr class="expanded-content">
+                <td colspan="12">
+                  <div class="card">
+                    <div class="card-title">B-4567 当日航段详情</div>
+                    <table class="sub-table">
+                      <thead>
+                        <tr>
+                          <th>航班号</th>
+                          <th>航线</th>
+                          <th>计划起飞</th>
+                          <th>计划落地</th>
+                          <th>状态</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>HO1201</td>
+                          <td>杭州→西安</td>
+                          <td>12:00</td>
+                          <td>14:40</td>
+                          <td><span class="tag tag-success">正常</span></td>
+                        </tr>
+                        <tr>
+                          <td>HO1202</td>
+                          <td>西安→杭州</td>
+                          <td>15:30</td>
+                          <td>18:10</td>
+                          <td><span class="tag tag-info">待执行</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 机组排班管理 -->
+      <div class="page" id="page3">
+        <div class="page-title">3. 机组排班管理</div>
+        <div class="card">
+          <div class="card-title">机组执勤排班表</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>执行日期</label>
+              <input type="date">
+            </div>
+            <div class="search-item">
+              <label>航班号</label>
+              <input type="text">
+            </div>
+            <div class="search-item">
+              <label>机组类型</label>
+              <select>
+                <option>全部</option>
+                <option>飞行机组</option>
+                <option>乘务机组</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">新增排班</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>航班号</th>
+                <th>机长</th>
+                <th>副驾</th>
+                <th>乘务长</th>
+                <th>执勤时长</th>
+                <th>休息时长</th>
+                <th>合规校验</th>
+                <th>驻外地点</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CA1501</td>
+                <td>王机长</td>
+                <td>李副驾</td>
+                <td>张乘务长</td>
+                <td>6h20m</td>
+                <td>12h</td>
+                <td><span class="tag tag-success">合规</span></td>
+                <td>上海</td>
+                <td>
+                  <button class="btn btn-sm btn-default">更换人员</button>
+                  <button class="btn btn-sm btn-default">调取备份</button>
+                </td>
+              </tr>
+              <tr>
+                <td>MU5105</td>
+                <td>刘机长</td>
+                <td>—</td>
+                <td>赵乘务长</td>
+                <td>9h10m</td>
+                <td>7h</td>
+                <td><span class="tag tag-warning">接近超时</span></td>
+                <td>广州</td>
+                <td>
+                  <button class="btn btn-sm btn-default">调整排班</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 情报与气象支撑 - 改造后完整版 -->
+      <div class="page" id="page4">
+        <div class="page-title">4. 情报与气象支撑</div>
+        
+        <!-- 新增：整体风险总状态核心看板 -->
+        <div class="risk-dashboard warning" id="globalRiskDashboard">
+          <div>
+            <div class="risk-title">当日整体运行风险总状态</div>
+            <div class="risk-desc">自动汇总气象+情报风险，加权判定全网运行安全状态</div>
+          </div>
+          <div>
+            <div class="risk-status warning">一般风险</div>
+            <div class="risk-desc">更新时间：2026-05-28 09:15:30</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">全球气象 & 航行情报综合监控（NOTAM）</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>机场/航路</label>
+              <input type="text" placeholder="输入机场四字码/航路">
+            </div>
+            <div class="search-item">
+              <label>风险等级</label>
+              <select>
+                <option>全部</option>
+                <option>无风险</option>
+                <option>低风险</option>
+                <option>中风险</option>
+                <option>高风险</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>信息类型</label>
+              <select>
+                <option>全部</option>
+                <option>气象信息</option>
+                <option>航行情报</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">刷新数据</button>
+            <button class="btn btn-default" onclick="generateReport()">生成研判报告</button>
+            <button class="btn btn-default">推送至签派</button>
+            <button class="btn btn-warning">手动重新研判</button>
+          </div>
+          
+          <table class="table">
+            <thead>
+              <tr>
+                <th>类型</th>
+                <th>影响区域</th>
+                <th>详细监测数据</th>
+                <th>情报分类</th>
+                <th>风险等级</th>
+                <th>生效时间</th>
+                <th>通告编号</th>
+                <th>简要说明</th>
+                <th>受影响对象</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- 气象风险1：上海虹桥雷阵雨 -->
+              <tr>
+                <td><span class="tag tag-info">气象</span></td>
+                <td>上海虹桥机场</td>
+                <td>温度：28℃，气压：1012hPa，风向：东南风15m/s，能见度：800m，降雨：25mm/h，雷暴对流：中强度</td>
+                <td>气象条件</td>
+                <td><span class="tag tag-warning">中风险</span></td>
+                <td>08:00 - 14:00</td>
+                <td>W2026052801</td>
+                <td>短时强对流，建议预留备降场</td>
+                <td>
+                  <div class="affected-flights">
+                    <div class="affected-title">受影响航班：</div>
+                    <span class="flight-tag">CA1501</span>
+                    <span class="flight-tag">MU5105</span>
+                    <span class="flight-tag">FM9101</span>
+                  </div>
+                </td>
+                <td><span class="tag tag-info">已推送</span></td>
+              </tr>
+              
+              <!-- 情报风险1：广州空域限流 -->
+              <tr>
+                <td><span class="tag tag-blue">情报</span></td>
+                <td>广州空域</td>
+                <td>-</td>
+                <td>空管运行类-空域限流</td>
+                <td><span class="tag tag-danger">高风险</span></td>
+                <td>全天生效</td>
+                <td>N2026052802</td>
+                <td>空域管控，流量受限30%</td>
+                <td>
+                  <div class="affected-flights">
+                    <div class="affected-title">受影响航班：</div>
+                    <span class="flight-tag">CA1502</span>
+                    <span class="flight-tag">CZ3905</span>
+                    <span class="flight-tag">MU5105</span>
+                  </div>
+                </td>
+                <td><span class="tag tag-danger">紧急提醒</span></td>
+              </tr>
+              
+              <!-- 气象风险2：深圳宝安台风监测 -->
+              <tr>
+                <td><span class="tag tag-info">气象</span></td>
+                <td>深圳宝安机场及周边航路</td>
+                <td>温度：30℃，气压：998hPa，风向：东北风25m/s，能见度：1500m，台风：距离200km，风速12级</td>
+                <td>气象条件-台风监测</td>
+                <td><span class="tag tag-warning">中风险</span></td>
+                <td>12:00 - 24:00</td>
+                <td>W2026052803</td>
+                <td>台风外围影响，阵风较大，注意起降安全</td>
+                <td>
+                  <div class="affected-flights">
+                    <div class="affected-title">受影响航班：</div>
+                    <span class="flight-tag">CZ3301</span>
+                    <span class="flight-tag">CZ3302</span>
+                    <span class="flight-tag">HO1201</span>
+                  </div>
+                </td>
+                <td><span class="tag tag-warning">预警中</span></td>
+              </tr>
+              
+              <!-- 情报风险2：北京首都跑道维修 -->
+              <tr>
+                <td><span class="tag tag-blue">情报</span></td>
+                <td>北京首都机场01跑道</td>
+                <td>-</td>
+                <td>机场设施类-跑道关闭</td>
+                <td><span class="tag tag-warning">中风险</span></td>
+                <td>06:00 - 10:00</td>
+                <td>N2026052804</td>
+                <td>01跑道维修，临时关闭，使用03跑道起降</td>
+                <td>
+                  <div class="affected-flights">
+                    <div class="affected-title">受影响航班：</div>
+                    <span class="flight-tag">CA1201</span>
+                    <span class="flight-tag">CA1501</span>
+                    <span class="flight-tag">CZ6501</span>
+                  </div>
+                </td>
+                <td><span class="tag tag-info">已通知</span></td>
+              </tr>
+              
+              <!-- 气象风险3：西安航路颠簸区 -->
+              <tr>
+                <td><span class="tag tag-info">气象</span></td>
+                <td>西安-成都航路</td>
+                <td>高空急流：9200米高度，风速45m/s，颠簸区：9000-10000米，积冰区：8000米</td>
+                <td>气象条件-航路天气</td>
+                <td><span class="tag tag-warning">中风险</span></td>
+                <td>全天生效</td>
+                <td>W2026052805</td>
+                <td>航路存在中度颠簸，建议调整飞行高度</td>
+                <td>
+                  <div class="affected-flights">
+                    <div class="affected-title">受影响航班：</div>
+                    <span class="flight-tag tag-gray">MU5432</span>
+                    <span class="flight-tag tag-gray">CZ3301</span>
+                    <span class="flight-tag tag-gray">HO1201</span>
+                  </div>
+                </td>
+                <td><span class="tag tag-info">已推送</span></td>
+              </tr>
+              
+              <!-- 情报风险3：上海浦东南部扇区关闭 -->
+              <tr>
+                <td><span class="tag tag-blue">情报</span></td>
+                <td>上海浦东南部扇区</td>
+                <td>-</td>
+                <td>空管运行类-扇区关闭</td>
+                <td><span class="tag tag-danger">高风险</span></td>
+                <td>10:00 - 16:00</td>
+                <td>N2026052806</td>
+                <td>扇区设备维护，临时关闭，航班需绕行</td>
+                <td>
+                  <div class="affected-flights">
+                    <div class="affected-title">受影响航班：</div>
+                    <span class="flight-tag">FM9101</span>
+                    <span class="flight-tag">MU5105</span>
+                    <span class="flight-tag">CA1501</span>
+                  </div>
+                </td>
+                <td><span class="tag tag-danger">紧急提醒</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 飞行签派放行 -->
+      <div class="page" id="page5">
+        <div class="page-title">5. 飞行签派放行</div>
+        <div class="card">
+          <div class="card-title">航班放行列表</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>航班号</label>
+              <input type="text">
+            </div>
+            <div class="search-item">
+              <label>放行状态</label>
+              <select>
+                <option>全部</option>
+                <option>待放行</option>
+                <option>已放行</option>
+                <option>拒绝放行</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">查询</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>航班号</th>
+                <th>飞机号</th>
+                <th>机组</th>
+                <th>计划起飞</th>
+                <th>气象/通告</th>
+                <th>计算油量</th>
+                <th>备降场</th>
+                <th>放行状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CA1501</td>
+                <td>B-5123</td>
+                <td>完整</td>
+                <td>08:00</td>
+                <td><span class="tag tag-success">正常</span></td>
+                <td>12.5t</td>
+                <td>杭州萧山</td>
+                <td><span class="tag tag-success">已放行</span></td>
+                <td><button class="btn btn-sm btn-default">查看放行单</button></td>
+              </tr>
+              <tr>
+                <td>MU5105</td>
+                <td>B-8976</td>
+                <td>完整</td>
+                <td>09:20</td>
+                <td><span class="tag tag-warning">存在风险</span></td>
+                <td>14.2t</td>
+                <td>深圳宝安</td>
+                <td><span class="tag tag-info">待放行</span></td>
+                <td>
+                  <button class="btn btn-sm btn-default">执行放行</button>
+                  <button class="btn btn-sm btn-default">推迟放行</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 实时航班动态监控 -->
+      <div class="page" id="page6">
+        <div class="page-title">6. 实时航班动态监控</div>
+        <div class="card">
+          <div class="card-title">全局航班动态（实时刷新）</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>航班号</label>
+              <input type="text">
+            </div>
+            <div class="search-item">
+              <label>运行阶段</label>
+              <select>
+                <option>全部</option>
+                <option>地面滑行</option>
+                <option>空中巡航</option>
+                <option>进近落地</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">查看空管指令</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>航班号</th>
+                <th>航线</th>
+                <th>计划时间</th>
+                <th>实际时间</th>
+                <th>当前阶段</th>
+                <th>延误时长</th>
+                <th>异常告警</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CA1501</td>
+                <td>北京→上海</td>
+                <td>08:00</td>
+                <td>08:02</td>
+                <td><span class="tag tag-success">空中巡航</span></td>
+                <td>0分钟</td>
+                <td>无</td>
+                <td><button class="btn btn-sm btn-default">查看轨迹</button></td>
+              </tr>
+              <tr>
+                <td>MU5105</td>
+                <td>上海→广州</td>
+                <td>09:20</td>
+                <td>09:55</td>
+                <td><span class="tag tag-warning">地面排队</span></td>
+                <td>35分钟</td>
+                <td><span class="tag tag-warning">流量管控</span></td>
+                <td><button class="btn btn-sm btn-default">发起协同</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 地面保障协同调度 -->
+      <div class="page" id="page7">
+        <div class="page-title">7. 地面保障协同调度</div>
+        <div class="card">
+          <div class="card-title">机场地面保障任务清单</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>起降机场</label>
+              <input type="text">
+            </div>
+            <div class="search-item">
+              <label>航班号</label>
+              <input type="text">
+            </div>
+            <button class="btn btn-primary">查询</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>航班号</th>
+                <th>机位/廊桥</th>
+                <th>航油加注</th>
+                <th>航食配载</th>
+                <th>行李装卸</th>
+                <th>车辆保障</th>
+                <th>整体进度</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>CA1501</td>
+                <td>廊桥 08</td>
+                <td><span class="tag tag-success">已完成</span></td>
+                <td><span class="tag tag-success">已完成</span></td>
+                <td><span class="tag tag-success">已完成</span></td>
+                <td><span class="tag tag-success">就位</span></td>
+                <td><span class="tag tag-success">100%</span></td>
+                <td><button class="btn btn-sm btn-default">确认离场</button></td>
+              </tr>
+              <tr>
+                <td>MU5105</td>
+                <td>远机位 23</td>
+                <td><span class="tag tag-info">进行中</span></td>
+                <td><span class="tag tag-warning">待配送</span></td>
+                <td><span class="tag tag-info">进行中</span></td>
+                <td><span class="tag tag-warning">车辆不足</span></td>
+                <td><span class="tag tag-warning">60%</span></td>
+                <td><button class="btn btn-sm btn-default">催促保障</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 应急处置与运行决策 -->
+      <div class="page" id="page8">
+        <div class="page-title">8. 应急处置与运行决策</div>
+        <div class="card">
+          <div class="card-title">在办应急事件</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>事件类型</label>
+              <select>
+                <option>全部</option>
+                <option>机械故障</option>
+                <option>天气备降</option>
+                <option>旅客特情</option>
+                <option>大面积延误</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>处置状态</label>
+              <select>
+                <option>全部</option>
+                <option>处置中</option>
+                <option>已闭环</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-default">新建应急工单</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>工单编号</th>
+                <th>关联航班</th>
+                <th>事件类型</th>
+                <th>发生时间</th>
+                <th>处置负责人</th>
+                <th>当前状态</th>
+                <th>报备情况</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>YJ2026052801</td>
+                <td>CZ3102</td>
+                <td>飞机临时故障</td>
+                <td>07:10</td>
+                <td>运行主管</td>
+                <td><span class="tag tag-warning">处置中</span></td>
+                <td><span class="tag tag-info">已报备空管</span></td>
+                <td><button class="btn btn-sm btn-default">编辑处置方案</button></td>
+              </tr>
+              <tr>
+                <td>YJ2026052802</td>
+                <td>MF8101</td>
+                <td>航路天气备降</td>
+                <td>10:05</td>
+                <td>签派主管</td>
+                <td><span class="tag tag-success">已闭环</span></td>
+                <td><span class="tag tag-success">全部报备完成</span></td>
+                <td><button class="btn btn-sm btn-default">查看台账</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 运行统计与事后复盘 -->
+      <div class="page" id="page9">
+        <div class="page-title">9. 运行统计与事后复盘</div>
+        <div class="card">
+          <div class="card-title">运行数据统计 & 不正常事件复盘</div>
+          <div class="search-wrap">
+            <div class="search-item">
+              <label>统计周期</label>
+              <select>
+                <option>当日</option>
+                <option>近7天</option>
+                <option>本月</option>
+                <option>自定义</option>
+              </select>
+            </div>
+            <div class="search-item">
+              <label>延误类型</label>
+              <select>
+                <option>全部</option>
+                <option>天气原因</option>
+                <option>流量管控</option>
+                <option>地面保障</option>
+                <option>机械故障</option>
+              </select>
+            </div>
+            <button class="btn btn-primary">生成报表</button>
+            <button class="btn btn-default">导出局方报表</button>
+          </div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>航班号</th>
+                <th>起降机场</th>
+                <th>延误时长</th>
+                <th>主要原因</th>
+                <th>处置过程</th>
+                <th>整改建议</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>MU5105</td>
+                <td>上海-广州</td>
+                <td>35分钟</td>
+                <td>空管流量管控</td>
+                <td>原地等待，听从空管指令</td>
+                <td>提前研判空域流量，优化排班</td>
+                <td><span class="tag tag-success">已复盘</span></td>
+              </tr>
+              <tr>
+                <td>CZ3102</td>
+                <td>深圳-成都</td>
+                <td>60分钟</td>
+                <td>飞机机械故障</td>
+                <td>紧急更换备份飞机</td>
+                <td>加强航前机务检查</td>
+                <td><span class="tag tag-info">待复盘</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 新增计划弹窗 -->
+  <div class="mask" id="addPlanDialog">
+    <div class="dialog">
+      <div class="dialog-title">新增航班计划</div>
+      <div class="form-item">
+        <label>航班号：</label>
+        <input type="text" id="newFlightNumber" placeholder="请输入航班号，如 CA1234">
+      </div>
+      <div class="form-item">
+        <label>航线：</label>
+        <input type="text" id="newRoute" placeholder="请输入航线，如 北京-上海">
+      </div>
+      <div class="form-item">
+        <label>计划起飞时间：</label>
+        <input type="time" id="newDepartureTime">
+      </div>
+      <div class="form-item">
+        <label>计划降落时间：</label>
+        <input type="time" id="newArrivalTime">
+      </div>
+      <div class="form-item">
+        <label>执行日期：</label>
+        <input type="date" id="newFlightDate">
+      </div>
+      <div class="form-item">
+        <label>计划状态：</label>
+        <select id="newPlanStatus">
+          <option value="草稿">草稿</option>
+        </select>
+        <small style="color: #94a3b8;">新建计划默认为草稿状态</small>
+      </div>
+      <div class="form-item">
+        <label>备注说明：</label>
+        <textarea id="newRemark" placeholder="填写计划创建的背景或特殊说明..."></textarea>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeAddPlanDialog()">取消</button>
+        <button class="btn btn-primary" onclick="submitNewPlan()">提交申报</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批复意见弹窗 -->
+  <div class="mask" id="approvalDetailsDialog">
+    <div class="dialog">
+      <div class="dialog-title">批复意见详情</div>
+      <div class="form-item">
+        <label>航班号：</label>
+        <input type="text" id="detailFlightNumber" readonly>
+      </div>
+      <div class="form-item">
+        <label>民航局批复意见：</label>
+        <textarea id="caacOpinion" readonly>经审核，该航班计划符合国家航线规划，准予备案。</textarea>
+      </div>
+      <div class="form-item">
+        <label>空管航路审核结果：</label>
+        <textarea id="airTrafficOpinion" readonly>航路可用，建议起飞时间调整至08:40，避开早高峰。</textarea>
+      </div>
+      <div class="form-item">
+        <label>机场机位分配情况：</label>
+        <textarea id="airportAllocation" readonly>已分配A380机位08号廊桥，预计登机口D15。</textarea>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeApprovalDetailsDialog()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 流程时间线弹窗 -->
+  <div class="mask" id="timelineDialog">
+    <div class="dialog">
+      <div class="dialog-title">航班计划审批流程时间线</div>
+      <div class="form-item">
+        <label>航班号：</label>
+        <input type="text" id="timelineFlightNumber" readonly>
+      </div>
+      <ul class="timeline">
+        <li class="timeline-item">
+          <div class="timeline-time">2026-05-28 09:00</div>
+          <div class="timeline-desc">航司提交申请</div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-time">2026-05-28 15:00</div>
+          <div class="timeline-desc">民航局审核通过</div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-time">2026-05-29 10:30</div>
+          <div class="timeline-desc">空管确认航路可行，时刻微调10分钟</div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-time">2026-05-29 14:15</div>
+          <div class="timeline-desc">机场分配廊桥08，机位确认</div>
+        </li>
+        <li class="timeline-item">
+          <div class="timeline-time">2026-05-29 16:00</div>
+          <div class="timeline-desc">计划正式生效，进入排班系统</div>
+        </li>
+      </ul>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeTimelineDialog()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 运力模块相关弹窗 -->
+  <div class="mask" id="replacePlaneDialog">
+    <div class="dialog">
+      <div class="dialog-title">本场换飞机</div>
+      <div class="form-item">
+        <label>航班号：</label>
+        <input type="text" id="replaceFlightNumber" readonly>
+      </div>
+      <div class="form-item">
+        <label>当前执飞机号：</label>
+        <input type="text" id="currentPlane" readonly>
+      </div>
+      <div class="form-item">
+        <label>替换飞机号：</label>
+        <input type="text" id="newPlane" placeholder="请输入新的飞机号">
+      </div>
+      <div class="form-item">
+        <label>更换原因：</label>
+        <select id="replaceReason">
+          <option value="">请选择更换原因</option>
+          <option value="飞机故障维修">飞机故障维修</option>
+          <option value="航前适航异常">航前适航异常</option>
+          <option value="定检延期">定检延期</option>
+          <option value="运力临时调配">运力临时调配</option>
+          <option value="航班合并">航班合并</option>
+          <option value="局方管控">局方管控</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>备注说明：</label>
+        <textarea id="replaceRemark" placeholder="填写更换飞机的详细说明..."></textarea>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeReplacePlaneDialog()">取消</button>
+        <button class="btn btn-primary" onclick="submitReplacePlane()">提交审批</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mask" id="transferDialog">
+    <div class="dialog">
+      <div class="dialog-title">发起跨场调机</div>
+      <div class="form-item">
+        <label>原执飞机号：</label>
+        <input type="text" id="originalPlane" readonly>
+      </div>
+      <div class="form-item">
+        <label>调机起始机场：</label>
+        <input type="text" id="startAirport" placeholder="请输入起始机场">
+      </div>
+      <div class="form-item">
+        <label>调机目标机场：</label>
+        <input type="text" id="targetAirport" placeholder="请输入目标机场">
+      </div>
+      <div class="form-item">
+        <label>调机日期：</label>
+        <input type="date" id="transferDate">
+      </div>
+      <div class="form-item">
+        <label>调机目的：</label>
+        <select id="transferPurpose">
+          <option value="">请选择调机目的</option>
+          <option value="过夜站点调整">过夜站点调整</option>
+          <option value="异地补运力">异地补运力</option>
+          <option value="故障飞机转场维修">故障飞机转场维修</option>
+          <option value="新开航线运力前置部署">新开航线运力前置部署</option>
+          <option value="备用机支援异地延误航班">备用机支援异地延误航班</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>调机申请编号：</label>
+        <input type="text" id="transferNumber" placeholder="系统自动生成" readonly>
+      </div>
+      <div class="form-item">
+        <label>申请理由：</label>
+        <textarea id="transferReason" placeholder="填写调机申请的详细理由..."></textarea>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeTransferDialog()">取消</button>
+        <button class="btn btn-primary" onclick="submitTransferRequest()">提交申请</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mask" id="segmentSwapDialog">
+    <div class="dialog">
+      <div class="dialog-title">航段拆分互换</div>
+      <div class="form-item">
+        <label>主航班号：</label>
+        <input type="text" id="mainFlightNumber" readonly>
+      </div>
+      <div class="form-item">
+        <label>关联航班号：</label>
+        <input type="text" id="relatedFlight" placeholder="请输入需要互换的航班号">
+      </div>
+      <div class="form-item">
+        <label>互换方式：</label>
+        <select id="swapMethod">
+          <option value="single">单航段更换</option>
+          <option value="exchange">双机航段互换</option>
+          <option value="split">航段拆分</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>新执飞机号：</label>
+        <input type="text" id="swapNewPlane" placeholder="请输入新执飞机号">
+      </div>
+      <div class="form-item">
+        <label>更换原因：</label>
+        <select id="swapReason">
+          <option value="">请选择更换原因</option>
+          <option value="飞机故障维修">飞机故障维修</option>
+          <option value="航前适航异常">航前适航异常</option>
+          <option value="运力临时调配">运力临时调配</option>
+          <option value="航段延误调整">航段延误调整</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label>备注说明：</label>
+        <textarea id="swapRemark" placeholder="填写航段互换的详细说明..."></textarea>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeSegmentSwapDialog()">取消</button>
+        <button class="btn btn-primary" onclick="submitSegmentSwap()">提交申请</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 研判报告弹窗 -->
+  <div class="mask" id="reportMask">
+    <div class="dialog report-dialog">
+      <div class="dialog-title">每日运行气象情报研判报告</div>
+      <div class="report-section">
+        <div class="report-section-title">一、当日整体运行风险结论</div>
+        <div class="report-content">
+          当日全网运行风险等级为【一般风险】，主要受广州空域限流（高风险）、上海虹桥雷阵雨（中风险）、上海浦东扇区关闭（高风险）等因素综合影响。整体运行可控，但部分航路和机场需重点关注，建议签派部门加强放行审核，调度部门做好航班调整预案。
+        </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">二、全国重点机场气象分析</div>
+        <div class="report-content">
+          1. 上海虹桥机场：08:00-14:00出现雷阵雨天气，温度28℃，东南风15m/s，能见度800m，降雨25mm/h，中强度雷暴对流，中风险等级，建议该时段起降航班预留备降场。<br>
+          2. 深圳宝安机场：12:00-24:00受台风外围影响，东北风25m/s，阵风较大，中风险等级，注意起降安全。<br>
+          3. 北京首都机场：06:00-10:00 01跑道维修关闭，使用03跑道起降，中风险等级，可能造成起飞排队延误。<br>
+          4. 其他主要机场（成都、西安、广州）气象条件基本正常，无显著风险。
+        </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">三、航路风险区段分析</div>
+        <div class="report-content">
+          1. 西安-成都航路：全天存在中度颠簸区（9000-10000米），高空急流风速45m/s，积冰区8000米，中风险等级，建议航班调整飞行高度至10500米以上。<br>
+          2. 上海浦东南部扇区：10:00-16:00因设备维护临时关闭，航班需绕行，高风险等级，预计增加飞行时间15-20分钟。<br>
+          3. 广州空域：全天流量受限30%，高风险等级，进港航班可能出现空中等待情况。
+        </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">四、NOTAM情报风险汇总</div>
+        <div class="report-content">
+          1. 机场设施类：北京首都01跑道维修关闭（N2026052804），中风险，影响早间北京出港航班。<br>
+          2. 空管运行类：广州空域限流（N2026052802）、上海浦东南部扇区关闭（N2026052806），均为高风险，影响华南、华东地区航班运行。<br>
+          3. 其他情报：无计划类、人员资质类重要通告。
+        </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">五、重点预警提示</div>
+        <div class="report-content">
+          1. 台风预警：深圳宝安机场12:00后受台风外围影响，关注台风路径变化，及时调整深圳进出港航班计划。<br>
+          2. 雷雨预警：上海虹桥机场08:00-14:00雷阵雨，做好航班备降、延误准备。<br>
+          3. 空域管控预警：广州空域、上海浦东扇区限流/关闭，提前协调空管部门，优化航班航线。
+        </div>
+      </div>
+      <div class="report-section">
+        <div class="report-section-title">六、运行建议</div>
+        <div class="report-content">
+          1. 签派部门：加强上海、广州、深圳地区航班放行审核，增加备份油量，合理选择备降场；对西安-成都航路航班提示调整飞行高度。<br>
+          2. 调度部门：针对北京首都跑道维修、上海浦东扇区关闭，提前做好航班时刻调整预案；密切关注广州空域流量管控情况，及时发布航班延误预警。<br>
+          3. 机组提示：上海、深圳起降航班注意天气变化，严格执行标准操作程序；西安-成都航路航班注意颠簸防范。<br>
+          4. 地面保障：上海虹桥机场做好雷雨天气下的地面保障准备，如廊桥、除冰等设备检查。
+        </div>
+      </div>
+      <div class="report-meta">
+        <div>研判人：张气象</div>
+        <div>审核人：李签派</div>
+        <div>生成时间：2026-05-28 09:30:00</div>
+        <div>值班台账编号：YJTZ-20260528-001</div>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn-default" onclick="closeReport()">关闭</button>
+        <button class="btn btn-primary">导出PDF</button>
+        <button class="btn btn-success">发送至值班邮箱</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 菜单切换页面
+    const menuItems = document.querySelectorAll('.menu-item');
+    const pages = document.querySelectorAll('.page');
+    menuItems.forEach(item => {
+      item.addEventListener('click', function () {
+        // 清除所有选中状态
+        menuItems.forEach(menu => menu.classList.remove('active'));
+        this.classList.add('active');
+        // 切换页面
+        const pageId = this.getAttribute('data-page');
+        pages.forEach(page => {
+          page.classList.remove('show');
+          if(page.id === pageId) {
+            page.classList.add('show');
+          }
+        })
+      })
+    });
+
+    // 表格展开/收起功能
+    document.querySelectorAll('.expandable-row').forEach(row => {
+      row.addEventListener('click', function(e) {
+        if(e.target.classList.contains('toggle-icon')) return; // 如果点击的是图标本身，跳过
+        
+        const toggleIcon = this.querySelector('.toggle-icon');
+        const expandedContent = this.nextElementSibling;
+        
+        toggleIcon.classList.toggle('rotate');
+        expandedContent.classList.toggle('show');
+      });
+    });
+
+    // 图标点击展开/收起功能
+    document.querySelectorAll('.toggle-icon').forEach(icon => {
+      icon.addEventListener('click', function(e) {
+        e.stopPropagation(); // 阻止事件冒泡到父级tr
+        
+        const row = this.closest('.expandable-row');
+        const expandedContent = row.nextElementSibling;
+        
+        this.classList.toggle('rotate');
+        expandedContent.classList.toggle('show');
+      });
+    });
+
+    // 航班计划管理相关函数
+    function openAddPlanDialog() {
+      document.getElementById('addPlanDialog').style.display = 'flex';
+    }
+
+    function closeAddPlanDialog() {
+      document.getElementById('addPlanDialog').style.display = 'none';
+    }
+
+    function submitNewPlan() {
+      const flightNumber = document.getElementById('newFlightNumber').value;
+      const route = document.getElementById('newRoute').value;
+      
+      if(!flightNumber || !route) {
+        alert('请填写航班号和航线！');
+        return;
+      }
+      
+      alert(`航班计划 ${flightNumber}(${route}) 已提交申报！`);
+      closeAddPlanDialog();
+    }
+
+    function showApprovalDetails(flightNumber) {
+      document.getElementById('detailFlightNumber').value = flightNumber;
+      document.getElementById('approvalDetailsDialog').style.display = 'flex';
+    }
+
+    function closeApprovalDetailsDialog() {
+      document.getElementById('approvalDetailsDialog').style.display = 'none';
+    }
+
+    function showTimeline(flightNumber) {
+      document.getElementById('timelineFlightNumber').value = flightNumber;
+      document.getElementById('timelineDialog').style.display = 'flex';
+    }
+
+    function closeTimelineDialog() {
+      document.getElementById('timelineDialog').style.display = 'none';
+    }
+
+    function checkApprovalProgress(flightNumber) {
+      alert(`正在跟踪航班 ${flightNumber} 的审批进度...`);
+    }
+
+    function viewAirTrafficReview(flightNumber) {
+      alert(`正在查看航班 ${flightNumber} 的空管审核情况...`);
+    }
+
+    function confirmAirportAllocation(flightNumber) {
+      alert(`航班 ${flightNumber} 机位分配已确认，进入生效阶段！`);
+    }
+
+    // 运力模块相关函数
+    function openReplacePlaneDialog(flightNumber) {
+      document.getElementById('replaceFlightNumber').value = flightNumber;
+      document.getElementById('currentPlane').value = getPlaneByFlight(flightNumber);
+      document.getElementById('replacePlaneDialog').style.display = 'flex';
+    }
+
+    function closeReplacePlaneDialog() {
+      document.getElementById('replacePlaneDialog').style.display = 'none';
+    }
+
+    function submitReplacePlane() {
+      alert('本场换飞机申请已提交！');
+      closeReplacePlaneDialog();
+    }
+
+    function openTransferDialog(flightNumber) {
+      document.getElementById('originalPlane').value = getPlaneByFlight(flightNumber);
+      document.getElementById('transferNumber').value = generateTransferNumber();
+      document.getElementById('transferDialog').style.display = 'flex';
+    }
+
+    function closeTransferDialog() {
+      document.getElementById('transferDialog').style.display = 'none';
+    }
+
+    function submitTransferRequest() {
+      alert('跨场调机申请已提交！需要等待内部审批及空管批复。');
+      closeTransferDialog();
+    }
+
+    function openSegmentSwapDialog(flightNumber) {
+      document.getElementById('mainFlightNumber').value = flightNumber;
+      document.getElementById('segmentSwapDialog').style.display = 'flex';
+    }
+
+    function closeSegmentSwapDialog() {
+      document.getElementById('segmentSwapDialog').style.display = 'none';
+    }
+
+    function submitSegmentSwap() {
+      alert('航段拆分互换申请已提交！');
+      closeSegmentSwapDialog();
+    }
+
+    // 情报与气象支撑相关函数
+    function generateReport() {
+      document.getElementById('reportMask').style.display = 'flex';
+    }
+
+    function closeReport() {
+      document.getElementById('reportMask').style.display = 'none';
+    }
+
+    // 模拟风险状态切换（可根据实际数据调整）
+    function updateGlobalRiskStatus(status) {
+      const dashboard = document.getElementById('globalRiskDashboard');
+      dashboard.className = 'risk-dashboard ' + status;
+      const statusText = dashboard.querySelector('.risk-status');
+      statusText.className = 'risk-status ' + status;
+      if (status === 'normal') {
+        statusText.textContent = '正常';
+      } else if (status === 'warning') {
+        statusText.textContent = '一般风险';
+      } else if (status === 'danger') {
+        statusText.textContent = '高风险';
+      }
+      // 更新时间
+      const now = new Date();
+      const timeStr = now.getFullYear() + '-' + 
+                      (now.getMonth()+1).toString().padStart(2, '0') + '-' + 
+                      now.getDate().toString().padStart(2, '0') + ' ' + 
+                      now.getHours().toString().padStart(2, '0') + ':' + 
+                      now.getMinutes().toString().padStart(2, '0') + ':' + 
+                      now.getSeconds().toString().padStart(2, '0');
+      dashboard.querySelector('.risk-desc:last-child').textContent = '更新时间：' + timeStr;
+    }
+
+    // 辅助函数
+    function getPlaneByFlight(flightNumber) {
+      const planes = {
+        'CA1501': 'B-5123',
+        'CZ3301': 'B-7890',
+        'MU5105': 'B-1234',
+        'CZ6501': 'B-2345',
+        'FM9101': 'B-3456',
+        'HO1201': 'B-4567'
+      };
+      return planes[flightNumber] || '未知';
+    }
+
+    function generateTransferNumber() {
+      const now = new Date();
+      const dateStr = now.getFullYear().toString().substr(2) + 
+                     String(now.getMonth() + 1).padStart(2, '0') + 
+                     String(now.getDate()).padStart(2, '0');
+      const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      return 'TJ' + dateStr + randomNum;
+    }
+  </script>
+</body>
+</html>
