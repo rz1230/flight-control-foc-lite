@@ -4,7 +4,7 @@ FOC（Flight Operations Control）航班运行控制系统简易前端 Demo，�
 项目为纯前端页面，开发周期短，主打快速落地页面布局、视觉风格与基础交互，不适用于具体业务。
 
 二、界面
-https://github.com/user-attachments/assets/ecbd17c2-019a-47fd-9581-30dc1232958f
+![系统截图](https://github.com/user-attachments/assets/ecbd17c2-019a-47fd-9581-30dc1232958f)
 
 二、技术栈
 
